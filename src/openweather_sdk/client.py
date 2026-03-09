@@ -1,4 +1,5 @@
 from .http import HttpClient
+from .models import Coordinates
 
 
 class OpenWeatherClient:
@@ -34,3 +35,71 @@ class OpenWeatherClient:
             retries=retries,
             backoff_factor=backoff_factor
         )
+    
+    def _build_location_query(
+            self, 
+            city_name: str, 
+            country_code: str | None = None, 
+            state_code: str | None = None
+    ) -> str:
+        """
+        Build a location query string for the geocoding API.
+
+        Args:
+            city_name: Name of the city to get coordinates for.
+            country_code: Optional ISO 3166 country code to disambiguate cities with the same name.
+            state_code: Optional state code to further disambiguate cities with the same name.
+        """
+        parts = [city_name]
+
+        if state_code:
+            parts.append(state_code)
+        if country_code:
+            parts.append(country_code)
+
+        return ",".join(parts)
+
+    def get_coordinates(
+            self, 
+            city_name: str, 
+            country_code: str | None = None, 
+            state_code: str | None = None
+    ) -> Coordinates | None:
+        """
+        Get the geographical coordinates (latitude and longitude) for a given city.
+
+        Args:
+            city_name: Name of the city to get coordinates for.
+            country_code: Optional ISO 3166 country code to disambiguate cities with the same name.
+            state_code: Optional state code to further disambiguate cities with the same name.
+        
+        Returns:
+            Coordinates | None: Coordinates of the city if found, otherwise None.
+        
+        Raises:
+            AuthenticationError: If the API key is invalid or unauthorized.
+            RateLimitError: If the API rate limit is exceeded.
+            OpenWeatherError: For other API errors returned by the API.
+
+        Examples:
+            >>> client = OpenWeatherClient(api_key="my_key")
+            >>> client.get_coordinates("São Paulo", country_code="BR")
+            Coordinates(lat=-23.55, lon=-46.63)
+        """
+        
+        query = self._build_location_query(city_name, country_code, state_code)
+
+        response = self.http.get("/geo/1.0/direct", params={"q": query, "limit": 1})
+
+        if not response:
+            return None
+        
+        location = response[0]
+
+        lat = location.get("lat")
+        lon = location.get("lon")
+
+        if lat is None or lon is None:
+            return None
+        
+        return Coordinates(lat=lat, lon=lon)        
