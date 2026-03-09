@@ -15,3 +15,9 @@ class WeatherData:
     pressure: int
     description: str
     icon: str
+
+@dataclass
+class ForecastData:
+    timestamp: int
+    dt_txt: str
+    weather: WeatherData
