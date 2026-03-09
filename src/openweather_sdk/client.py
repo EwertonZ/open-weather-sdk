@@ -1,5 +1,5 @@
 from .http import HttpClient
-from .models import Coordinates, WeatherData
+from .models import Coordinates, ForecastData, WeatherData
 
 
 class OpenWeatherClient:
@@ -142,3 +142,43 @@ class OpenWeatherClient:
             description=data["weather"][0]["description"],
             icon=data["weather"][0]["icon"]
         )
+    
+    def get_forecast(self, coordinates: Coordinates) -> list[ForecastData]:
+        """
+        Get the weather forecast for the next 5 days at 3-hour intervals for the specified coordinates.
+
+        Args:
+            coordinates: Coordinates object containing latitude and longitude.
+
+        Returns:
+            list[ForecastData]: A list of forecast data for the forecast periods.
+
+        Raises:
+            AuthenticationError: If the API key is invalid or unauthorized.
+            RateLimitError: If the API rate limit is exceeded.
+            OpenWeatherError: For any other errors returned by the API.
+        """
+        params = {
+            "lat": coordinates.lat,
+            "lon": coordinates.lon
+        }
+
+        data = self.http.get("/data/2.5/forecast", params=params)
+
+        return [
+            ForecastData(
+                timestamp=item["dt"],
+                dt_txt=item["dt_txt"],
+                weather=WeatherData(
+                    temperature=item["main"]["temp"],
+                    feels_like=item["main"]["feels_like"],
+                    min_temperature=item["main"]["temp_min"],
+                    max_temperature=item["main"]["temp_max"],
+                    humidity=item["main"]["humidity"],
+                    pressure=item["main"]["pressure"],
+                    description=item["weather"][0]["description"],
+                    icon=item["weather"][0]["icon"]
+                )
+            )
+            for item in data.get("list", [])
+        ]
