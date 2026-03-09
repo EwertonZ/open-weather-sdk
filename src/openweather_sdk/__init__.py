@@ -5,6 +5,7 @@ from .exceptions import (
     NotFoundError,
     RateLimitError,
 )
+from .models import Coordinates
 
 __all__ = [
     "OpenWeatherClient",
@@ -12,4 +13,5 @@ __all__ = [
     "AuthenticationError",
     "NotFoundError",
     "RateLimitError",
+    "Coordinates",
 ]
