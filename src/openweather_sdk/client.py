@@ -1,5 +1,5 @@
 from .http import HttpClient
-from .models import Coordinates
+from .models import Coordinates, WeatherData
 
 
 class OpenWeatherClient:
@@ -102,4 +102,43 @@ class OpenWeatherClient:
         if lat is None or lon is None:
             return None
         
-        return Coordinates(lat=lat, lon=lon)        
+        return Coordinates(lat=lat, lon=lon)
+
+    def get_current_weather(self, coordinates: Coordinates) -> WeatherData:
+        """
+        Get the current weather conditions for the specified coordinates.
+
+        Args:
+            coordinates: Coordinates object containing latitude and longitude.
+
+        Returns:
+            WeatherData: Current weather data returned by the API.
+
+        Raises:
+            AuthenticationError: If the API key is invalid or unauthorized.
+            RateLimitError: If the API rate limit is exceeded.
+            OpenWeatherError: For any other errors returned by the API. 
+        
+        Examples:
+            >>> client = OpenWeatherClient(api_key="my_key")
+            >>> coords = Coordinates(lat=-23.55, lon=-46.63)
+            >>> client.get_current_weather(coords)
+            WeatherData(temperature=25.0, feels_like=27.0, ...)
+        """
+        params = {
+            "lat": coordinates.lat,
+            "lon": coordinates.lon
+        }
+
+        data = self.http.get("/data/2.5/weather", params=params)
+
+        return WeatherData(
+            temperature=data["main"]["temp"],
+            feels_like=data["main"]["feels_like"],
+            min_temperature=data["main"]["temp_min"],
+            max_temperature=data["main"]["temp_max"],
+            humidity=data["main"]["humidity"],
+            pressure=data["main"]["pressure"],
+            description=data["weather"][0]["description"],
+            icon=data["weather"][0]["icon"]
+        )
