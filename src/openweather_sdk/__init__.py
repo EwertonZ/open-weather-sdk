@@ -5,7 +5,7 @@ from .exceptions import (
     NotFoundError,
     RateLimitError,
 )
-from .models import Coordinates, WeatherData
+from .models import Coordinates, WeatherData, ForecastData
 
 __all__ = [
     "OpenWeatherClient",
@@ -15,4 +15,5 @@ __all__ = [
     "RateLimitError",
     "Coordinates",
     "WeatherData",
+    "ForecastData",
 ]
