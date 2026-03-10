@@ -1,3 +1,5 @@
+[![PyPI version](https://img.shields.io/pypi/v/weather-sdk-challenge.svg)](https://pypi.org/project/weather-sdk-challenge/)
+
 # OpenWeather SDK
 
 A lightweight and developer-friendly Python SDK for interacting with the
